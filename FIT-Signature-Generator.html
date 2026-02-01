@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FIT Email Signature Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #004282 0%, #00b0f0 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+        
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        h1 {
+            color: #004282;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #595959;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #444444;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .required {
+            color: #d32f2f;
+        }
+        
+        input[type="text"],
+        input[type="tel"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #004282;
+        }
+        
+        .template-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .template-option {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        .template-option:hover {
+            border-color: #004282;
+            background: #f5f9ff;
+        }
+        
+        .template-option input[type="radio"] {
+            margin-right: 10px;
+        }
+        
+        .template-option.selected {
+            border-color: #004282;
+            background: #f5f9ff;
+        }
+        
+        .template-title {
+            font-weight: 600;
+            color: #004282;
+            margin-bottom: 3px;
+        }
+        
+        .template-desc {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #004282;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #003166;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 66, 130, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #444;
+        }
+        
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+        
+        .preview-section h2 {
+            color: #004282;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        
+        .preview-box {
+            background: #f9f9f9;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 25px;
+            min-height: 300px;
+        }
+        
+        .signature-preview {
+            background: white;
+            padding: 20px;
+            border-radius: 4px;
+        }
+        
+        .download-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #004282;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #444;
+        }
+        
+        .download-info strong {
+            color: #004282;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Signature Styles */
+        .sig-name {
+            font-family: Aptos, Calibri, Arial, sans-serif;
+            font-size: 12pt;
+            font-weight: bold;
+            color: rgb(0, 66, 130);
+            margin: 0;
+            padding: 0;
+        }
+        
+        .sig-title {
+            font-family: Aptos, Calibri, Arial, sans-serif;
+            font-size: 10pt;
+            color: rgb(102, 102, 102);
+            font-style: italic;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .sig-contact {
+            font-family: Aptos, Calibri, Arial, sans-serif;
+            font-size: 10pt;
+            color: rgb(128, 128, 128);
+            margin: 5px 0;
+        }
+        
+        .sig-contact-label {
+            color: rgb(166, 206, 57);
+            font-weight: bold;
+        }
+        
+        .sig-contact-value {
+            color: rgb(128, 128, 128);
+            text-decoration: none;
+        }
+        
+        .sig-org {
+            font-family: Aptos, Calibri, Arial, sans-serif;
+            font-size: 12pt;
+            font-weight: bold;
+            color: rgb(0, 66, 130);
+            margin: 10px 0 0 0;
+        }
+        
+        .sig-address {
+            font-family: Aptos, Calibri, Arial, sans-serif;
+            font-size: 10pt;
+            color: rgb(128, 128, 128);
+            margin: 2px 0;
+        }
+        
+        .sig-web {
+            font-family: Aptos, Calibri, Arial, sans-serif;
+            font-size: 10pt;
+            color: rgb(36, 132, 198);
+            margin: 2px 0;
+        }
+        
+        .sig-web a {
+            color: rgb(36, 132, 198);
+            text-decoration: none;
+        }
+        
+        .sig-note {
+            font-family: Aptos, Calibri, Arial, sans-serif;
+            font-size: 10pt;
+            color: rgb(36, 132, 198);
+            margin: 10px 0 0 0;
+        }
+        
+        .sig-disclaimer {
+            font-family: Aptos, Calibri, Arial, sans-serif;
+            font-size: 10pt;
+            color: rgb(0, 0, 0);
+            margin: 10px 0 0 0;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Input Form Section -->
+        <div class="card">
+            <h1>FIT Email Signature Generator</h1>
+            <p class="subtitle">Create professionally formatted email signatures in seconds</p>
+            
+            <form id="signatureForm">
+                <!-- Required Fields -->
+                <div class="form-group">
+                    <label for="firstName">First Name <span class="required">*</span></label>
+                    <input type="text" id="firstName" required placeholder="Jane">
+                </div>
+                
+                <div class="form-group">
+                    <label for="lastName">Last Name <span class="required">*</span></label>
+                    <input type="text" id="lastName" required placeholder="Smith">
+                </div>
+                
+                <div class="form-group">
+                    <label for="title">Position <span class="required">*</span></label>
+                    <input type="text" id="title" required placeholder="Your position">
+                </div>
+                
+                <!-- Optional Fields -->
+                <div class="form-group">
+                    <label for="officePhone">Office Phone Number</label>
+                    <input type="tel" id="officePhone" placeholder="603.555.1234">
+                    <p class="help-text">Format: 603.555.1234 (dots will be added automatically)</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="extension">Office Extension</label>
+                    <input type="text" id="extension" placeholder="123">
+                    <p class="help-text">Only shown if office phone is provided</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cellPhone">Cell Phone Number</label>
+                    <input type="tel" id="cellPhone" placeholder="603.555.5678">
+                    <p class="help-text">Format: 603.555.5678 (dots will be added automatically)</p>
+                </div>
+                
+                <!-- Template Selection -->
+                <div class="form-group">
+                    <label>Select Template <span class="required">*</span></label>
+                    <div class="template-options">
+                        <label class="template-option selected">
+                            <input type="radio" name="template" value="simplified" checked>
+                            <div>
+                                <div class="template-title">Template 1: Simplified</div>
+                                <div class="template-desc">No physical address shown</div>
+                            </div>
+                        </label>
+                        
+                        <label class="template-option">
+                            <input type="radio" name="template" value="market-street">
+                            <div>
+                                <div class="template-title">Template 2: 122 Market Street</div>
+                                <div class="template-desc">Standard office location</div>
+                            </div>
+                        </label>
+                        
+                        <label class="template-option">
+                            <input type="radio" name="template" value="custom">
+                            <div>
+                                <div class="template-title">Template 3: Custom Location</div>
+                                <div class="template-desc">Specify a different address</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group hidden" id="customAddressGroup">
+                    <label for="customAddress">Custom Address</label>
+                    <textarea id="customAddress" rows="2" placeholder="282 Belmont St, Manchester NH 03103"></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" id="resetBtn">Reset Form</button>
+                    <button type="button" class="btn-primary" id="downloadBtn">Download Signature</button>
+                </div>
+                
+                <div class="success-message" id="successMessage">
+                    ✓ Signature downloaded successfully!
+                </div>
+            </form>
+        </div>
+        
+        <!-- Preview Section -->
+        <div class="card preview-section">
+            <h2>Live Preview</h2>
+            <div class="preview-box">
+                <div class="signature-preview" id="signaturePreview">
+                    <p style="color: #999; font-style: italic;">Enter your information to see a preview...</p>
+                </div>
+            </div>
+            
+            <div class="download-info">
+                <strong>Installation Instructions:</strong><br>
+                After downloading, copy the signature file to:<br>
+                <code>%APPDATA%\Microsoft\Signatures\</code><br><br>
+                Then select it in Outlook → File → Options → Mail → Signatures
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Form elements
+        const form = document.getElementById('signatureForm');
+        const firstName = document.getElementById('firstName');
+        const lastName = document.getElementById('lastName');
+        const title = document.getElementById('title');
+        const officePhone = document.getElementById('officePhone');
+        const extension = document.getElementById('extension');
+        const cellPhone = document.getElementById('cellPhone');
+        const customAddress = document.getElementById('customAddress');
+        const customAddressGroup = document.getElementById('customAddressGroup');
+        const preview = document.getElementById('signaturePreview');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const successMessage = document.getElementById('successMessage');
+        
+        // Template selection
+        const templateOptions = document.querySelectorAll('.template-option');
+        const templateRadios = document.querySelectorAll('input[name="template"]');
+        
+        // Handle template selection UI
+        templateOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                templateOptions.forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+                
+                // Show/hide custom address field
+                if (radio.value === 'custom') {
+                    customAddressGroup.classList.remove('hidden');
+                } else {
+                    customAddressGroup.classList.add('hidden');
+                }
+                
+                updatePreview();
+            });
+        });
+        
+        // Update preview on any input
+        const inputs = [firstName, lastName, title, officePhone, extension, cellPhone, customAddress];
+        inputs.forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+        
+        templateRadios.forEach(radio => {
+            radio.addEventListener('change', updatePreview);
+        });
+        
+        // Format phone number with dots (xxx.xxx.xxxx)
+        function formatPhoneNumber(value) {
+            // Remove all non-numeric characters
+            const numbers = value.replace(/\D/g, '');
+            
+            // Apply formatting based on length
+            if (numbers.length <= 3) {
+                return numbers;
+            } else if (numbers.length <= 6) {
+                return numbers.slice(0, 3) + '.' + numbers.slice(3);
+            } else {
+                return numbers.slice(0, 3) + '.' + numbers.slice(3, 6) + '.' + numbers.slice(6, 10);
+            }
+        }
+        
+        // Add phone formatting to office phone field
+        officePhone.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldValue = e.target.value;
+            const oldLength = oldValue.length;
+            
+            e.target.value = formatPhoneNumber(e.target.value);
+            
+            // Adjust cursor position after formatting
+            const newLength = e.target.value.length;
+            const diff = newLength - oldLength;
+            e.target.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+            
+            updatePreview();
+        });
+        
+        // Add phone formatting to cell phone field
+        cellPhone.addEventListener('input', function(e) {
+            const cursorPosition = e.target.selectionStart;
+            const oldValue = e.target.value;
+            const oldLength = oldValue.length;
+            
+            e.target.value = formatPhoneNumber(e.target.value);
+            
+            // Adjust cursor position after formatting
+            const newLength = e.target.value.length;
+            const diff = newLength - oldLength;
+            e.target.setSelectionRange(cursorPosition + diff, cursorPosition + diff);
+            
+            updatePreview();
+        });
+        
+        // Generate email from name (first initial + last name)
+        function generateEmail() {
+            const first = firstName.value.trim().toLowerCase();
+            const last = lastName.value.trim().toLowerCase();
+            if (first && last) {
+                return `${first.charAt(0)}${last}@fitnh.org`;
+            }
+            return '';
+        }
+        
+        // Update preview
+        function updatePreview() {
+            const data = {
+                firstName: firstName.value.trim(),
+                lastName: lastName.value.trim(),
+                fullName: `${firstName.value.trim()} ${lastName.value.trim()}`,
+                title: title.value.trim(),
+                officePhone: officePhone.value.trim(),
+                extension: extension.value.trim(),
+                cellPhone: cellPhone.value.trim(),
+                email: generateEmail(),
+                template: document.querySelector('input[name="template"]:checked').value,
+                customAddress: customAddress.value.trim()
+            };
+            
+            if (!data.fullName.trim() || !data.title) {
+                preview.innerHTML = '<p style="color: #999; font-style: italic;">Enter your information to see a preview...</p>';
+                return;
+            }
+            
+            preview.innerHTML = generateSignatureHTML(data);
+        }
+        
+        // Generate signature HTML
+        function generateSignatureHTML(data) {
+            let html = `
+                <div class="sig-name">${data.fullName}</div>
+                <div class="sig-title">${data.title}</div>
+                <div class="sig-contact">
+            `;
+            
+            // Office phone with optional extension
+            if (data.officePhone) {
+                html += `<span class="sig-contact-label">O: </span><span class="sig-contact-value">${data.officePhone}</span>`;
+                if (data.extension) {
+                    html += ` <span class="sig-contact-label">x</span>${data.extension}`;
+                }
+                html += '<br>';
+            }
+            
+            // Cell phone
+            if (data.cellPhone) {
+                html += `<span class="sig-contact-label">C: </span><span class="sig-contact-value">${data.cellPhone}</span><br>`;
+            }
+            
+            // Email
+            if (data.email) {
+                html += `<span class="sig-contact-label">E: </span><a href="mailto:${data.email}" class="sig-contact-value">${data.email}</a>`;
+            }
+            
+            html += '</div>';
+            
+            // Organization
+            html += '<div class="sig-org">FAMILIES IN TRANSITION</div>';
+            
+            // Address based on template
+            if (data.template === 'market-street') {
+                html += '<div class="sig-address">122 Market Street, Manchester NH 03101</div>';
+            } else if (data.template === 'custom' && data.customAddress) {
+                html += `<div class="sig-address">${data.customAddress}</div>`;
+            }
+            
+            // Phone and website
+            html += `
+                <div class="sig-web">603.641.9441 | <a href="http://www.fitnh.org" target="_blank">WWW.FITNH.ORG</a></div>
+            `;
+            
+            // Mailing address note (Custom Location only)
+            if (data.template === 'custom') {
+                html += '<div class="sig-note">Please note our mailing address is:<br>122 Market Street, Manchester NH 03101</div>';
+            }
+            
+            // Confidentiality notice
+            html += `
+                <div class="sig-disclaimer">
+                    CONFIDENTIALITY NOTICE: This email message, including any attachment, is intended for the sole use of the intended recipient(s) and may contain privileged, confidential information and may be exempt from further disclosure or dissemination under applicable law. If you are not the intended recipient of this message, any dissemination, distribution, or copying of this email is strictly prohibited. If you receive this message in error, please notify the sender by e-mail, reply and immediately delete the email and any attachments, as well as any copies thereof or replies thereto.
+                </div>
+            `;
+            
+            return html;
+        }
+        
+        // Download signature
+        downloadBtn.addEventListener('click', function() {
+            const data = {
+                firstName: firstName.value.trim(),
+                lastName: lastName.value.trim(),
+                fullName: `${firstName.value.trim()} ${lastName.value.trim()}`,
+                title: title.value.trim(),
+                officePhone: officePhone.value.trim(),
+                extension: extension.value.trim(),
+                cellPhone: cellPhone.value.trim(),
+                email: generateEmail(),
+                template: document.querySelector('input[name="template"]:checked').value,
+                customAddress: customAddress.value.trim()
+            };
+            
+            if (!data.firstName || !data.lastName || !data.title) {
+                alert('Please fill in all required fields (First Name, Last Name, and Title)');
+                return;
+            }
+            
+            const signatureHTML = generateSignatureHTMLForFile(data);
+            const filename = `${data.firstName}${data.lastName}_FIT.htm`;
+            
+            const blob = new Blob([signatureHTML], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Show success message
+            successMessage.classList.add('show');
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        });
+        
+        // Generate complete HTML file for download
+        function generateSignatureHTMLForFile(data) {
+            let contactHTML = '';
+            
+            // Office phone with optional extension
+            if (data.officePhone) {
+                contactHTML += `<span style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(166, 206, 57); font-weight: bold;">O: </span><span style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(128, 128, 128);">${data.officePhone}</span>`;
+                if (data.extension) {
+                    contactHTML += ` <span style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(166, 206, 57); font-weight: bold;">x</span><span style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(128, 128, 128);">${data.extension}</span>`;
+                }
+                contactHTML += '<br>';
+            }
+            
+            // Cell phone
+            if (data.cellPhone) {
+                contactHTML += `<span style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(166, 206, 57); font-weight: bold;">C: </span><span style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(128, 128, 128);">${data.cellPhone}</span><br>`;
+            }
+            
+            // Email
+            if (data.email) {
+                contactHTML += `<span style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(166, 206, 57); font-weight: bold;">E: </span><a href="mailto:${data.email}" style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(128, 128, 128); text-decoration: none;">${data.email}</a>`;
+            }
+            
+            let addressHTML = '';
+            if (data.template === 'market-street') {
+                addressHTML = '<p style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(128, 128, 128); margin: 2px 0;">122 Market Street, Manchester NH 03101</p>';
+            } else if (data.template === 'custom' && data.customAddress) {
+                addressHTML = `<p style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(128, 128, 128); margin: 2px 0;">${data.customAddress}</p>`;
+            }
+            
+            let mailingNote = '';
+            if (data.template === 'custom') {
+                mailingNote = `
+                    <p style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(36, 132, 198); margin: 10px 0 0 0;">
+                        Please note our mailing address is:<br>
+                        122 Market Street, Manchester NH 03101
+                    </p>
+                `;
+            }
+            
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body style="margin: 0; padding: 0;">
+    <div style="font-family: Aptos, Calibri, Arial, sans-serif;">
+        <p style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 12pt; font-weight: bold; color: rgb(0, 66, 130); margin: 0; padding: 0;">${data.fullName}</p>
+        <p style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(102, 102, 102); font-style: italic; margin: 0; padding: 0;">${data.title}</p>
+        <p style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(128, 128, 128); margin: 5px 0;">
+            ${contactHTML}
+        </p>
+        <p style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 12pt; font-weight: bold; color: rgb(0, 66, 130); margin: 10px 0 0 0;">FAMILIES IN TRANSITION</p>
+        ${addressHTML}
+        <p style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; margin: 2px 0;">
+            <span style="color: rgb(36, 132, 198);">603.641.9441 | <a href="http://www.fitnh.org" target="_blank" style="color: rgb(36, 132, 198); text-decoration: none;">WWW.FITNH.ORG</a></span>
+        </p>
+        ${mailingNote}
+        <p style="font-family: Aptos, Calibri, Arial, sans-serif; font-size: 10pt; color: rgb(0, 0, 0); margin: 10px 0 0 0; line-height: 1.4;">
+            CONFIDENTIALITY NOTICE: This email message, including any attachment, is intended for the sole use of the intended recipient(s) and may contain privileged, confidential information and may be exempt from further disclosure or dissemination under applicable law. If you are not the intended recipient of this message, any dissemination, distribution, or copying of this email is strictly prohibited. If you receive this message in error, please notify the sender by e-mail, reply and immediately delete the email and any attachments, as well as any copies thereof or replies thereto.
+        </p>
+    </div>
+</body>
+</html>`;
+        }
+        
+        // Reset form
+        resetBtn.addEventListener('click', function() {
+            form.reset();
+            templateOptions.forEach(opt => opt.classList.remove('selected'));
+            templateOptions[0].classList.add('selected');
+            customAddressGroup.classList.add('hidden');
+            updatePreview();
+        });
+        
+        // Initial preview
+        updatePreview();
+    </script>
+</body>
+</html>
